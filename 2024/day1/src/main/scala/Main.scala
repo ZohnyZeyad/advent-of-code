@@ -2,7 +2,7 @@ import scala.io.Source
 
 object Main extends App {
 
-  private val input = Source.fromFile("F:/PROGRAMMING/SCALA/advent-of-code/day1/data/input.txt")
+  private val input = Source.fromFile("./data/day1.input")
 
   private val lines = input.getLines()
 

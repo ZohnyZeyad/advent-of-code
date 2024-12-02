@@ -1,2 +1,7 @@
 .idea/
+.bsp/
+.metals/
+.scala-build/
+.bloop/
+
 target/
