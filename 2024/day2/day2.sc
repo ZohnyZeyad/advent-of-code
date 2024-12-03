@@ -38,3 +38,5 @@ println(reports.count(isSafe(_, 0)))
 // reports.filter(isSafe(_, 0)).foreach(println)
 // println("---------")
 // reports.filterNot(isSafe(_, 0)).foreach(println)
+
+file.close()
