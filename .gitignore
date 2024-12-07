@@ -6,3 +6,5 @@
 .ammonite/
 
 target/
+
+metals.sbt
