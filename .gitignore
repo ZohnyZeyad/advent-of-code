@@ -3,5 +3,6 @@
 .metals/
 .scala-build/
 .bloop/
+.ammonite/
 
 target/

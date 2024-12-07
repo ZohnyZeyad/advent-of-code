@@ -85,3 +85,5 @@ def countXmasOccurences(
   count
 
 println(countXmasOccurences(linesArray, "MAS"))
+
+file.close()
