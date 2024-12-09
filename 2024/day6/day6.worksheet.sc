@@ -93,12 +93,13 @@ def causesLoop(
   walkWithObstruction(startPos, startDir, Set((startPos, startDir)))
 }
 
-val validObstaclePositions = for {
-  y <- area.indices
-  x <- area(0).indices
-  if area(y)(x) == '.' && (y, x) != startPos
-  if isLoop((y, x))
-} yield (y, x)
+val validObstaclePositions =
+  for
+    y <- area.indices
+    x <- area(0).indices
+    if area(y)(x) == '.' && (y, x) != startPos
+    if isLoop((y, x))
+  yield (y, x)
 
 validObstaclePositions.size
 
