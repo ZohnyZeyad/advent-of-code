@@ -22,14 +22,26 @@ def calculateAntinodes(
   val dy = y2 - y1
   val dx = x2 - x1
 
-  val antinode1 = (y1 - dy, x1 - dx)
-  val antinode2 = (y2 + dy, x2 + dx)
+  def generateAntinodes(
+      y: Int,
+      x: Int,
+      dy: Int,
+      dx: Int,
+      acc: List[(Int, Int)]
+  ): List[(Int, Int)] = {
+    val antinode = (y + dy, x + dx)
+    if !isInBounds(antinode._1, antinode._2) then acc
+    else generateAntinodes(antinode._1, antinode._2, dy, dx, antinode :: acc)
+  }
 
-  List(antinode1, antinode2).filter(isInBounds)
-}
+  def isInBounds(y: Int, x: Int): Boolean = {
+    y >= 0 && x >= 0 && y < lines.length && x < lines(0).length
+  }
 
-def isInBounds(y: Int, x: Int): Boolean = {
-  y >= 0 && x >= 0 && y < lines.length && x < lines(0).length
+  val antinodes1 = generateAntinodes(y1, x1, -dy, -dx, List(antenna1))
+  val antinodes2 = generateAntinodes(y2, x2, dy, dx, List(antenna2))
+
+  antinodes1 ::: antinodes2
 }
 
 val antinodes = antennasMap
