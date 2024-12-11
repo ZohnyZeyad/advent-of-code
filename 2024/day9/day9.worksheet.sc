@@ -31,23 +31,62 @@ val freeRanges: Vector[Range] = line
         newIndex -> (ranges :+ newRange)
   ._2
 
-val zippedIds = occupiedRanges.zipWithIndex
+lazy val zippedIds = occupiedRanges.zipWithIndex
 
-val idsFromEnd = zippedIds.reverse
+lazy val idsFromEnd = zippedIds.reverse
   .flatMap((range, id) => range.map(_ => id))
 
-val sizeOccupied = occupiedRanges.map(_.size).sum
+lazy val sizeOccupied = occupiedRanges.map(_.size).sum
 
 object Fragment:
   @tailrec
-  def checkSum(from: Int, fill: Vector[Int], acc: Long): Long = {
+  def checksum(from: Int, fill: Vector[Int], acc: Long): Long = {
     if from >= sizeOccupied then acc
     else if occupiedRanges.exists(_.contains(from)) then
       val fileCheck = from * zippedIds.find(_._1.contains(from)).get._2
-      checkSum(from + 1, fill, acc + fileCheck)
-    else checkSum(from + 1, fill.tail, acc + from * fill.head)
+      checksum(from + 1, fill, acc + fileCheck)
+    else checksum(from + 1, fill.tail, acc + from * fill.head)
   }
 
-println(Fragment.checkSum(0, idsFromEnd, 0))
+println(Fragment.checksum(0, idsFromEnd, 0))
+
+object Compact:
+  @tailrec
+  def compact(
+      compacted: Vector[(Int, Range)],
+      freeSpaces: Vector[Range],
+      toMove: Vector[(Int, Range)]
+  ): Vector[(Int, Range)] =
+    if toMove.isEmpty then compacted
+    else
+      val (id, range) = toMove.head
+      val spaceIndex = freeSpaces
+        .takeWhile(_.start < range.start)
+        .indexWhere(_.size >= range.size)
+
+      if spaceIndex == -1 then
+        compact(compacted :+ (id -> range), freeSpaces, toMove.tail)
+      else
+        val space = freeSpaces(spaceIndex)
+        val newFreeSpace = (space.start + range.size) until space.end
+
+        val shift = range.start - space.start
+        val newPosition = (range.start - shift) until (range.end - shift)
+
+        compact(
+          compacted :+ (id -> newPosition),
+          freeSpaces.updated(spaceIndex, newFreeSpace),
+          toMove.tail
+        )
+
+lazy val toMove = zippedIds.map(_.swap).reverse
+val compacted = Compact.compact(Vector.empty, freeRanges, toMove)
+
+val compactedChecksum = compacted.view
+  .sortBy(_._2.start)
+  .map[Long]:
+    case (id, range) =>
+      range.map(_.toLong * id.toLong).sum.toLong
+  .sum
 
 file.close()
