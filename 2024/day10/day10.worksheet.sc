@@ -22,15 +22,15 @@ val dirs = Vector(
   Point(0, -1) // LEFT
 )
 
-def dfs(topoMap: ArraySeq[String], trailHeads: List[Point]): List[Int] =
+def dfs(topoMap: ArraySeq[String], trailHeads: List[Point]): List[List[Point]] =
   trailHeads.map(head => walk(topoMap, List(0 -> head), Nil))
 
 def walk(
     field: ArraySeq[String],
     toWalk: List[(Int, Point)],
     acc: List[Point]
-): Int = {
-  if toWalk.isEmpty then acc.distinct.size
+): List[Point] = {
+  if toWalk.isEmpty then acc
   else
     val (currVal, currPos) = toWalk.head
     val nextValue = currVal + 1
@@ -53,8 +53,12 @@ def isValid(p: Point): Boolean =
   p.row >= 0 && p.col >= 0
     && p.row < topoMap.length && p.col < topoMap(0).length
 
-lazy val scores = dfs(topoMap, trailHeads.toList).sum
+lazy val trailPoints = dfs(topoMap, trailHeads.toList)
 
+val scores = trailPoints.map(_.distinct.size).sum
 println(scores)
+
+val ratingScores = trailPoints.map(_.size).sum
+println(ratingScores)
 
 file.close()
