@@ -1,76 +1,83 @@
 import scala.io.Source
 import scala.annotation.tailrec
+import scala.collection.immutable.HashSet
 
 val file = Source.fromFile("day12.input")
 lazy val lines = file.getLines().toVector
 
 case class Point(row: Int, col: Int)
 
+lazy val points =
+  for
+    row <- lines.indices
+    col <- lines(row).indices
+  yield Point(row, col)
+
+lazy val dirs = Vector(
+  Point(1, 0), // UP
+  Point(0, 1), // RIGHT
+  Point(-1, 0), // DOWN
+  Point(0, -1) // LEFT
+)
+
+object Garden:
+  @tailrec
+  def floodFill(
+      queue: Vector[Point],
+      visited: HashSet[Point],
+      area: Long = 0L,
+      perimeter: Long = 0L
+  ): (Long, Long, HashSet[Point]) = {
+
+    if queue.isEmpty then (area, perimeter, visited)
+    else
+      val currentPoint = queue.head
+      val plantType = lines(currentPoint.row)(currentPoint.col)
+      val adjacents = neighbors(plantType, currentPoint, dirs)
+
+      val (oldAdjacents, newAdjacents) =
+        adjacents.foldLeft(List.empty, List.empty) { (acc, neighbor) =>
+          neighbor match
+            case oldN if visited.contains(oldN) => (oldN :: acc._1, acc._2)
+            case newN                           => (acc._1, newN :: acc._2)
+        }
+
+      if !newAdjacents.isEmpty then
+        val perimeters = 4 - newAdjacents.size - oldAdjacents.size
+        floodFill(
+          queue.tail :++ newAdjacents,
+          visited ++ newAdjacents,
+          area + 1,
+          perimeter + perimeters
+        )
+      else
+        val perimeters = 4 - oldAdjacents.size
+        floodFill(queue.tail, visited, area + 1, perimeter + perimeters)
+  }
+
+def neighbors(plant: Char, point: Point, dirs: Vector[Point]): List[Point] =
+  dirs
+    .map(delta => Point((point.row + delta.row), (point.col + delta.col)))
+    .filter(isValid)
+    .filter(np => lines(np.row)(np.col) == plant)
+    .toList
+
 def isValid(p: Point): Boolean =
   p.row >= 0 && p.col >= 0
     && p.row < lines.length && p.col < lines(0).length
 
-def floodFill(
-    map: Array[Array[Char]],
-    visited: Array[Array[Boolean]],
-    start: Point
-): (Int, Int) = {
-  val rows = map.length
-  val cols = map(0).length
-  val directions = List(Point(0, 1), Point(1, 0), Point(0, -1), Point(-1, 0))
-  val plantType = map(start.row)(start.col)
-  var area = 0
-  var perimeter = 0
-
-  val queue = scala.collection.mutable.Queue[Point]()
-  queue.enqueue(start)
-  visited(start.row)(start.col) = true
-
-  while (queue.nonEmpty) {
-    val current = queue.dequeue()
-    area += 1
-
-    for (dir <- directions) {
-      val neighbor = Point(current.row + dir.row, current.col + dir.col)
-      if (isValid(neighbor)) {
-        if (
-          map(neighbor.row)(neighbor.col) == plantType && !visited(
-            neighbor.row
-          )(
-            neighbor.col
-          )
-        ) {
-          visited(neighbor.row)(neighbor.col) = true
-          queue.enqueue(neighbor)
-        } else if (map(neighbor.row)(neighbor.col) != plantType) {
-          perimeter += 1
-        }
-      } else {
-        perimeter += 1
-      }
+lazy val totalPrice = points
+  .foldLeft[(Long, HashSet[Point])](0L, HashSet.empty) { (acc, point) =>
+    {
+      if acc._2.contains(point) then acc
+      else
+        val (area, perimeter, visited) =
+          Garden.floodFill(Vector(point), acc._2 + point)
+        (acc._1 + (area * perimeter), visited)
     }
   }
+  ._1
 
-  (area, perimeter)
-}
-
-def calculateTotalPrice(map: Array[Array[Char]]): Int = {
-  val rows = map.length
-  val cols = map(0).length
-  val visited = Array.ofDim[Boolean](rows, cols)
-  var totalPrice = 0
-
-  for (i <- 0 until rows; j <- 0 until cols) {
-    if (!visited(i)(j)) {
-      val (area, perimeter) = floodFill(map, visited, Point(i, j))
-      totalPrice += area * perimeter
-    }
-  }
-
-  totalPrice
-}
-
-lazy val map = lines.map(_.toCharArray).toArray
-calculateTotalPrice(map)
+println(totalPrice)
 
 file.close()
