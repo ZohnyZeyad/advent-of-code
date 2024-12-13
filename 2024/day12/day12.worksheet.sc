@@ -35,24 +35,15 @@ object Garden:
       val plantType = lines(currentPoint.row)(currentPoint.col)
       val adjacents = neighbors(plantType, currentPoint, dirs)
 
-      val (oldAdjacents, newAdjacents) =
-        adjacents.foldLeft(List.empty, List.empty) { (acc, neighbor) =>
-          neighbor match
-            case oldN if visited.contains(oldN) => (oldN :: acc._1, acc._2)
-            case newN                           => (acc._1, newN :: acc._2)
-        }
+      val (oldAdjacents, newAdjacents) = adjacents.partition(visited.contains)
 
-      if !newAdjacents.isEmpty then
-        val perimeters = 4 - newAdjacents.size - oldAdjacents.size
-        floodFill(
-          queue.tail :++ newAdjacents,
-          visited ++ newAdjacents,
-          area + 1,
-          perimeter + perimeters
-        )
-      else
-        val perimeters = 4 - oldAdjacents.size
-        floodFill(queue.tail, visited, area + 1, perimeter + perimeters)
+      val perimeters = 4 - newAdjacents.size - oldAdjacents.size
+      floodFill(
+        queue.tail :++ newAdjacents,
+        visited ++ newAdjacents,
+        area + 1,
+        perimeter + perimeters
+      )
   }
 
 def neighbors(plant: Char, point: Point, dirs: Vector[Point]): List[Point] =
