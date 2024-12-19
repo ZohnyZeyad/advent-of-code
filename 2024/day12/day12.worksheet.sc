@@ -32,8 +32,8 @@ case class Point(x: Int, y: Int) extends Ordered[Point] {
   }
 
   def compare(that: Point): Int = {
-    val rowComparison = this.x.compare(that.x)
-    if (rowComparison != 0) rowComparison else this.y.compare(that.y)
+    val colComparison = this.x.compare(that.x)
+    if (colComparison != 0) colComparison else this.y.compare(that.y)
   }
 }
 
