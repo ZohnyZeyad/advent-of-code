@@ -2,7 +2,7 @@ import scala.io.Source
 
 object Main extends App {
 
-  private val input = Source.fromFile("./data/day1.input")
+  private val input = Source.fromResource("day1.input")
 
   private val lines = input.getLines()
 
@@ -16,14 +16,13 @@ object Main extends App {
   private val ids2Sorted = ids2.sorted
 
   private val sum: Int =
-    ids1.sorted.zip(ids2.sorted)
-      .map { case (id1, id2) => Math.abs(id1 - id2) }
-      .sum
+    ids1.sorted.zip(ids2.sorted).map { case (id1, id2) => Math.abs(id1 - id2) }.sum
 
   println(sum)
 
-  private val similarityScore = ids1Sorted.foldLeft(0) { case (acc, id) =>
-    ids2Sorted.count(_ == id) * id + acc
+  private val similarityScore = ids1Sorted.foldLeft(0) {
+    case (acc, id) =>
+      ids2Sorted.count(_ == id) * id + acc
   }
 
   println(similarityScore)
