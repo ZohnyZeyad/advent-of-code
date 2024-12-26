@@ -65,10 +65,6 @@ def fullCodeMinPath(code: String): Int =
 
 def minPath(depth: Int, code: String): Int = ???
 
-// val ans1 = input.map: code =>
-//   fullCodeMinPath(code) * (code.init).toInt
-// .sum
-
 val memo = collection.mutable.Map.empty[(Char, Char, Int), Long]
 
 def dirPathLength(from: Char, to: Char, depth: Int): Long =
